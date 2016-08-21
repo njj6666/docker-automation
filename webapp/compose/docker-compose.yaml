@@ -1,5 +1,6 @@
 version: '2'
 services:
+
   db:
     build:
       context: ${WORKSPACE}/Dockerfiles
@@ -8,19 +9,19 @@ services:
       POSTGRES_PASSWORD: ${PG_PASSWORD}
     restart: always
     container_name: mypostgres
-    expose:
-      - "5432"
+
   dbcli:
     build:
       context: ${WORKSPACE}/Dockerfiles
       dockerfile: PG-Dockerfile
     environment:
-      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      PGPASSWORD: ${PG_PASSWORD}
     volumes:
       - ${WORKSPACE}/data:/tmp/data
-    links:
-      - db:mypostgres
     container_name: dbcli
+    depends_on: 
+      - db
+    restart: always
     entrypoint:
       - psql 
       - -h 
@@ -29,4 +30,3 @@ services:
       - postgres 
       - -f 
       - /tmp/data/pgdata.sql
-
