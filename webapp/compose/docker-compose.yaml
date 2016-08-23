@@ -7,26 +7,19 @@ services:
       dockerfile: PG-Dockerfile
     environment:
       POSTGRES_PASSWORD: ${PG_PASSWORD}
-    restart: always
     container_name: mypostgres
 
-  dbcli:
+  web:
     build:
       context: ${WORKSPACE}/Dockerfiles
-      dockerfile: PG-Dockerfile
-    environment:
-      PGPASSWORD: ${PG_PASSWORD}
-    volumes:
-      - ${WORKSPACE}/data:/tmp/data
-    container_name: dbcli
+      dockerfile: TOMCAT-Dockerfile
     depends_on: 
       - db
-    restart: always
-    entrypoint:
-      - psql 
-      - -h 
-      - mypostgres 
-      - -U 
-      - postgres 
-      - -f 
-      - /tmp/data/pgdata.sql
+    links:
+      - db:postgres
+    volumes:
+      - ${WORKSPACE}/artifacts/webdemo.war:/usr/local/tomcat/webapps/webdemo.war
+    ports:
+      - "8080"
+
+  

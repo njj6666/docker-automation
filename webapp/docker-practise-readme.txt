@@ -9,7 +9,7 @@ docker build -t njj6666/postgres:v1 -f Dockerfiles/PG-Dockerfile .
 docker run --name mypostgres -e POSTGRES_PASSWORD=${PG_PASSWORD} -d postgres
 
 --interact
-docker run -it --net bridge --rm --name dbcli -e PGPASSWORD=${PG_PASSWORD}  --link mypostgres:postgres postgres psql -h postgres -U postgres
+docker run -it --net bridge --rm --name dbcli2 -e PGPASSWORD=${PG_PASSWORD}  --link mypostgres:postgres postgres psql -h postgres -U postgres
 
 -- populate data 
 docker run -it -rm -e PGPASSWORD=${PG_PASSWORD} -v ${WORKSPACE}/data:/tmp/data --link mypostgres:postgres postgres psql -h postgres -U postgres -f /tmp/data/pgdata.sql
@@ -51,3 +51,24 @@ docker run --name lb -d -p 8081:80 -p 8082:443 -p 8083:8088 -v {WORKSPACE}/nginx
 2.docker build -t jijun/postgres:latest  Dockerfiles/postgres/
 
 3.编写Compose file
+
+dbcli:
+    build:
+      context: ${WORKSPACE}/Dockerfiles
+      dockerfile: PG-Dockerfile
+    environment:
+      PGPASSWORD: ${PG_PASSWORD}
+    volumes:
+      - ${WORKSPACE}/data:/tmp/data
+    container_name: dbcli
+    depends_on: 
+      - db
+      - web
+    entrypoint:
+      - psql 
+      - -h 
+      - mypostgres 
+      - -U 
+      - postgres 
+      - -f 
+      - /tmp/data/pgdata.sql
