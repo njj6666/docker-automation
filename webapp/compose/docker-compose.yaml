@@ -19,9 +19,9 @@ services:
     links:
       - db:postgres
     volumes:
-      - ${WORKSPACE}/webapp/artifacts/webdemo.war:/usr/local/tomcat/webapps/webdemo.war
+      - ${WORKSPACE}/webapp/artifacts/:/usr/local/tomcat/webapps/
     ports:
-      - "8080"
+      - "8080:8080"
     network_mode: "bridge"
 
   
