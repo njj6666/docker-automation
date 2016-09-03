@@ -1,6 +1,6 @@
 --setenv.sh
 export PG_PASSWORD=123456
-export WORKSPACE=`pwd`
+export WORKSPACE=`pwd`     # docker-automation/
 
 #postgres:
 --Dockerfile:
@@ -9,10 +9,10 @@ docker build -t njj6666/postgres:v1 -f Dockerfiles/PG-Dockerfile .
 docker run --name mypostgres -e POSTGRES_PASSWORD=${PG_PASSWORD} -d postgres
 
 --interact
-docker run -it --net bridge --rm --name dbcli2 -e PGPASSWORD=${PG_PASSWORD}  --link mypostgres:postgres postgres psql -h postgres -U postgres
+docker run -it --net compose_default --rm --name dbcli2 -e PGPASSWORD=${PG_PASSWORD}  --link mypostgres:postgres postgres psql -h postgres -U postgres
 
 -- populate data 
-docker run -it -rm -e PGPASSWORD=${PG_PASSWORD} -v ${WORKSPACE}/data:/tmp/data --link mypostgres:postgres postgres psql -h postgres -U postgres -f /tmp/data/pgdata.sql
+docker run -it --rm -e PGPASSWORD=${PG_PASSWORD} -v ${WORKSPACE}/webapp/data:/tmp/data --link mypostgres:postgres postgres psql -h postgres -U postgres -f /tmp/data/pgdata.sql
 
 create table employees(id int, name char(30), role char(30));
 insert into employees values(1,'Robin','owner');
@@ -33,20 +33,20 @@ declare -x POSTGRES_PORT_5432_TCP_PORT="5432"
 declare -x POSTGRES_PORT_5432_TCP_PROTO="tcp"
 
 #web container
-docker run --name web1 -itd --link mypostgres:postgres -v ${WORKSPACE}/artifacts/webdemo.war:/usr/local/tomcat/webapps/webdemo.war tomcat
+docker run --name web1 -itd --link mypostgres:postgres -v ${WORKSPACE}/webapp/artifacts/webdemo.war:/usr/local/tomcat/webapps/webdemo.war tomcat
 
-docker run --name web2 -itd --link mypostgres:postgres -v ${WORKSPACE}/artifacts/webdemo.war:/usr/local/tomcat/webapps/webdemo.war tomcat
+docker run --name web2 -itd --link mypostgres:postgres -v ${WORKSPACE}/webapp/artifacts/webdemo.war:/usr/local/tomcat/webapps/webdemo.war tomcat
 
 #load balancer:
-docker run --name lb -d -p 8081:80 -p 8082:443 -p 8083:8088 -v {WORKSPACE}/nginx.conf:/etc/nginx/nginx.conf nginx
+docker run --name lb -d -p 8081:80 -p 8082:443 -p 8083:8088 -v {WORKSPACE}/webapp/nginx.conf:/etc/nginx/nginx.conf nginx
 
 -----------------------------------------------------------------------
 
 单机单节点自动化
 1.编写Dockerfile
-{WORKSPACE}/Dockerfiles/PG-Dockerfile
-{WORKSPACE}/Dockerfiles/tomcat/Dockerfile
-{WORKSPACE}/Dockerfiles/loadbalancer/Dockerfile
+{WORKSPACE}/webapp/Dockerfiles/PG-Dockerfile
+{WORKSPACE}/webapp/Dockerfiles/tomcat/Dockerfile
+{WORKSPACE}/webapp/Dockerfiles/loadbalancer/Dockerfile
 
 2.docker build -t jijun/postgres:latest  Dockerfiles/postgres/
 
@@ -54,12 +54,12 @@ docker run --name lb -d -p 8081:80 -p 8082:443 -p 8083:8088 -v {WORKSPACE}/nginx
 
 dbcli:
     build:
-      context: ${WORKSPACE}/Dockerfiles
+      context: ${WORKSPACE}/webapp/Dockerfiles
       dockerfile: PG-Dockerfile
     environment:
       PGPASSWORD: ${PG_PASSWORD}
     volumes:
-      - ${WORKSPACE}/data:/tmp/data
+      - ${WORKSPACE}/webapp/data:/tmp/data
     container_name: dbcli
     depends_on: 
       - db

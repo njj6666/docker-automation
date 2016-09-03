@@ -3,23 +3,25 @@ services:
 
   db:
     build:
-      context: ${WORKSPACE}/Dockerfiles
+      context: ${WORKSPACE}/webapp/Dockerfiles
       dockerfile: PG-Dockerfile
     environment:
       POSTGRES_PASSWORD: ${PG_PASSWORD}
     container_name: mypostgres
+    network_mode: "bridge"
 
   web:
     build:
-      context: ${WORKSPACE}/Dockerfiles
+      context: ${WORKSPACE}/webapp/Dockerfiles
       dockerfile: TOMCAT-Dockerfile
     depends_on: 
       - db
     links:
       - db:postgres
     volumes:
-      - ${WORKSPACE}/artifacts/webdemo.war:/usr/local/tomcat/webapps/webdemo.war
+      - ${WORKSPACE}/webapp/artifacts/webdemo.war:/usr/local/tomcat/webapps/webdemo.war
     ports:
       - "8080"
+    network_mode: "bridge"
 
   
