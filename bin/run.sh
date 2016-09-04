@@ -22,7 +22,6 @@ then
 	sleep 20
 	
 	docker run \
-	-it \
 	--rm \
 	--net bridge \
 	-e PGPASSWORD=${PG_PASSWORD} \
