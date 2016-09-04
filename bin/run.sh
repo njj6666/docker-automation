@@ -14,7 +14,7 @@ fi
 
 if [ "$1" = "webapp" ];
 then
-	source ${WORKSPACE}/webapp/config/setEnv.sh
+	source ${WORKSPACE}/webapp/config/setenv.sh
 
 	docker-compose -f ${WORKSPACE}/webapp/compose/docker-compose.yaml up -d
 
